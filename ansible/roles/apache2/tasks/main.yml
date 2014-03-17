@@ -1,0 +1,17 @@
+---
+  - name: Install apache2
+    sudo: yes
+    apt:  pkg={{ item.package }} state=latest
+    with_items: apache2_packages
+  
+  - name: Add virtual hosts
+    sudo: yes
+    template: src=vhost.tpl dest=/etc/apache2/sites-available/{{ item.server_name }}.conf
+    with_items: vhosts
+  
+  - name: Enable virtual hosts
+    sudo: yes
+    command: /usr/sbin/a2ensite {{ item.server_name }}.conf
+    with_items: vhosts
+    notify: restart apache2
+

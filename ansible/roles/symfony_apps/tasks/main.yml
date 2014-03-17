@@ -1,0 +1,12 @@
+---
+- name: Copy parameters.yml
+  sudo: yes
+  template: src={{ item.name }}_parameters.tpl dest=/var/www/{{item.name}}/app/config/parameters.yml
+  with_items: symfony_apps
+  
+- name: Install vendors Symfony app {{ item.name }}
+  command:  /usr/bin/composer install  -d {{ item.path }} 
+  with_items: symfony_apps
+
+- name: create database, schema and users for UMA
+  command: /var/www/uma/console jwinstalacion:instala
