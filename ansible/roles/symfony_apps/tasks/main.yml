@@ -4,9 +4,56 @@
   template: src={{ item.name }}_parameters.tpl dest=/var/www/{{item.name}}/app/config/parameters.yml
   with_items: symfony_apps
   
+- name: Install vendors locally to speed up the task
+  sudo: no
+  local_action: command composer.phar install -d /home/juanda/Apps/{{ item.name}}
+  with_items: symfony_apps  
+    
 - name: Install vendors Symfony app {{ item.name }}
   command:  /usr/bin/composer install  -d {{ item.path }} 
   with_items: symfony_apps
 
+## Install assets
+
+- name: install assets
+  command: php /var/www/uma/app/console assets:install --symlink /var/www/uma/web
+
+## Create uma database
+- name: test if uma database exists
+  shell: mysql -u root -e "show databases" | grep uma
+  ignore_errors: True
+  register: uma_result
+
 - name: create database, schema and users for UMA
-  command: /var/www/uma/console jwinstalacion:instala
+  command: php /var/www/uma/app/console doctrine:database:create
+  when: uma_result.stdout != "uma"
+
+- name: create schema and users for UMA
+  command: php /var/www/uma/app/console jwinstalacion:instala
+  when: uma_result.stdout != "uma"
+  
+## Create usuariosCNICE database
+- name: test if usuariosCNICE database exists
+  shell: mysql -u root -e "show databases" | grep usuariosCNICE
+  ignore_errors: True
+  register: usu_result
+  
+- name: copy usuariosCNICE.sql to server
+  template: src=usuariosCNICE.sql dest=/tmp/usuariosCNICE.sql owner=root group=root
+  when: usu_result.stdout != "usuariosCNICE"
+
+- name: feed usuariosCNICE.sql to server
+  shell: mysql -u root -e "create database usuariosCNICE" ;mysql -u root usuariosCNICE < /tmp/usuariosCNICE.sql 
+  when: usu_result.stdout != "usuariosCNICE"
+  
+## Create /dev/shm/uma for speed up
+
+- name: test if /dev/shm/uma exists
+  shell: ls /dev/shm | grep uma
+  ignore_errors: True
+  register: shm_uma_dir
+  
+- name: create /dev/shm/uma directory for speed up the symfony dev environment in vagrant
+  sudo: yes
+  shell: mkdir /dev/shm/uma; mkdir /dev/shm/uma/cache; mkdir /dev/shm/uma/logs; setfacl -R -m u:www-data:rwX -m u:vagrant:rwX /dev/shm/uma/cache /dev/shm/uma/logs; setfacl -dR -m u:www-data:rwX -m u:vagrant:rwX /dev/shm/uma/cache /dev/shm/uma/logs
+  when: shm_uma_dir.stdout != "uma"

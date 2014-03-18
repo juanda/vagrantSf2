@@ -9,10 +9,4 @@
   notify: restart mysql
 
 - name: Add root user password to MySQL
-  command: mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost'; FLUSH PRIVILEGES;"
-  
-- name: copy usuariosCNICE.sql to server
-  template: src=usuariosCNICE.sql dest=/tmp/usuariosCNICE.sql owner=root group=root
-
-- name: feed usuariosCNICE.sql to server
-  local_action: shell mysql -u root < /tmp/usuariosCNICE.sql 
+  command: mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost'; FLUSH PRIVILEGES;"  

@@ -8,6 +8,7 @@
     sys_packages:
       - mcrypt
       - postfix
+      - acl
     apache2_packages:
         - { name: apache2, package: apache2 }
         - { name: mod_apache, package: libapache2-mod-php5 }
@@ -36,13 +37,13 @@
 #    - apache2
 #    - mysql
 #    - php5
-    - phpmyadmin
-    - wget
-    - curl
-    - composer
-    - phpunit  
-    - git
-    - sqlite
+#    - phpmyadmin
+#    - wget
+#    - curl
+#    - composer
+#    - phpunit  
+#    - git
+#    - sqlite
     - symfony_apps
 #    - nginx
 #    - php5-fpm
