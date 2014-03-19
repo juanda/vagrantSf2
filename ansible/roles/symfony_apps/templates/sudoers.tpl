@@ -30,10 +30,10 @@ root    ALL=(ALL:ALL) ALL
 
 #includedir /etc/sudoers.d
 #Necesario para los servicios web de gestión remota
-www-data ALL=(ALL) NOPASSWD: /bin/chmod -R * /tmp/*
-www-data ALL=(ALL) NOPASSWD: /bin/chgrp -R * /tmp/*
-www-data ALL=(ALL) NOPASSWD: /bin/mkdir -p /tmp/*
-www-data ALL=(ALL) NOPASSWD: /bin/chown -R * /tmp/*
+www-data ALL=(ALL) NOPASSWD: /bin/chmod -R * /nfs/*
+www-data ALL=(ALL) NOPASSWD: /bin/chgrp -R * /nfs/*
+www-data ALL=(ALL) NOPASSWD: /bin/mkdir -p /nfs/*
+www-data ALL=(ALL) NOPASSWD: /bin/chown -R * /nfs/*
 www-data ALL=(ALL) NOPASSWD: /bin/cp
 www-data ALL=(ALL) NOPASSWD: /bin/mv
 www-data ALL=(ALL) NOPASSWD: /usr/bin/find

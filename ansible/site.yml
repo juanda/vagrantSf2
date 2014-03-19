@@ -34,17 +34,17 @@
       - { name: "xhprof", package: "pecl.php.net/xhprof-beta" }
     php_ppa: php5
   roles:
-    - init
-    - apache2
-    - mysql
-    - php5
-    - phpmyadmin
-    - wget
-    - curl
-    - composer
-    - phpunit  
-    - git
-    - sqlite
+#    - init
+#    - apache2
+#    - mysql
+#    - php5
+#    - phpmyadmin
+#    - wget
+#    - curl
+#    - composer
+#    - phpunit
+#    - git
+#    - sqlite
     - symfony_apps
 #    - nginx
 #    - php5-fpm

@@ -1,4 +1,65 @@
 ---
+
+## Create /dev/shm/uma for speed up Symfony with vagrant
+
+- name: test if /dev/shm/uma exists
+  shell: ls /dev/shm | grep uma
+  ignore_errors: True
+  register: shm_uma_dir
+
+- name: create /dev/shm/uma directory for speed up the symfony dev environment in vagrant
+  sudo: yes
+  shell: mkdir /dev/shm/uma; mkdir /dev/shm/uma/cache; mkdir /dev/shm/uma/logs;
+  when: shm_uma_dir.stdout != "uma"
+
+- name: set acl uma 1
+  sudo: yes
+  command: setfacl -R -m u:www-data:rwX -m u:vagrant:rwX /dev/shm/uma/cache /dev/shm/uma/logs
+
+
+- name: set acl uma 2
+  sudo: yes
+  command: setfacl -dR -m u:www-data:rwX -m u:vagrant:rwX /dev/shm/uma/cache /dev/shm/uma/logs
+
+
+## Create /dev/shm/sgr for speed up Symfony with vagrant
+
+- name: test if /dev/shm/sgr exists
+  shell: ls /dev/shm | grep sgr
+  ignore_errors: True
+  register: shm_sgr_dir
+
+- name: create /dev/shm/sgr directory for speed up the symfony dev environment in vagrant
+  sudo: yes
+  shell: mkdir /dev/shm/sgr; mkdir /dev/shm/sgr/cache; mkdir /dev/shm/sgr/logs
+  when: shm_sgr_dir.stdout != "sgr"
+
+- name: set acl sgr 1
+  sudo: yes
+  command: setfacl -R -m u:www-data:rwX -m u:vagrant:rwX /dev/shm/sgr/cache /dev/shm/sgr/logs
+
+
+- name: set acl sgr 2
+  sudo: yes
+  command: setfacl -dR -m u:www-data:rwX -m u:vagrant:rwX /dev/shm/sgr/cache /dev/shm/sgr/logs
+
+
+#create /nfs/ ... for sgr services
+
+- name: Create /nfs/correo1
+  file: state=directory path=/nfs/correo1 owner=www-data
+
+- name: Create /nfs/correo2
+  file: state=directory path=/nfs/correo2 owner=www-data
+
+- name: Create /nfs/web1
+  file: state=directory path=/nfs/web1 owner=www-data
+  
+- name: Create /nfs/web2
+  file: state=directory path=/nfs/web2 owner=www-data
+
+# Copy parameters.yml
+
 - name: Copy parameters.yml
   sudo: yes
   template: src={{ item.name }}_parameters.tpl dest=/var/www/{{item.name}}/app/config/parameters.yml
@@ -19,6 +80,7 @@
   command: php /var/www/uma/app/console assets:install --symlink /var/www/uma/web
 
 ## Create uma database
+
 - name: test if uma database exists
   shell: mysql -u root -e "show databases" | grep uma
   ignore_errors: True
@@ -33,6 +95,7 @@
   when: uma_result.stdout != "uma"
   
 ## Create usuariosCNICE database
+
 - name: test if usuariosCNICE database exists
   shell: mysql -u root -e "show databases" | grep usuariosCNICE
   ignore_errors: True
@@ -45,42 +108,11 @@
 - name: feed usuariosCNICE.sql to server
   shell: mysql -u root -e "create database usuariosCNICE" ;mysql -u root usuariosCNICE < /tmp/usuariosCNICE.sql 
   when: usu_result.stdout != "usuariosCNICE"
-  
-## Create /dev/shm/uma for speed up
 
-- name: test if /dev/shm/uma exists
-  shell: ls /dev/shm | grep uma
-  ignore_errors: True
-  register: shm_uma_dir
-  
-- name: create /dev/shm/uma directory for speed up the symfony dev environment in vagrant
-  sudo: yes
-  shell: mkdir /dev/shm/uma; mkdir /dev/shm/uma/cache; mkdir /dev/shm/uma/logs; 
-  when: shm_uma_dir.stdout != "uma"
-  
-- name: set acl
-  sudo: yes
-  shell: setfacl -R -m u:www-data:rwX -m u:vagrant:rwX /dev/shm/uma/cache /dev/shm/uma/logs; setfacl -dR -m u:www-data:rwX -m u:vagrant:rwX /dev/shm/uma/cache /dev/shm/uma/logs
-  when: shm_uma_dir.stdout == "uma"
-  
-## Create /dev/shm/sgr for speed up
+- name: acl-usuarios-setup
+  command: php /var/www/uma/app/console jwinstalacion:acl-usuarios-setup
 
-- name: test if /dev/shm/sgr exists
-  shell: ls /dev/shm | grep sgr
-  ignore_errors: True
-  register: shm_sgr_dir
-  
-- name: create /dev/shm/sgr directory for speed up the symfony dev environment in vagrant
+## Sudoers for SGR
+- name: add commands to sudoers
   sudo: yes
-  shell: mkdir /dev/shm/sgr; mkdir /dev/shm/sgr/cache; mkdir /dev/shm/sgr/logs
-  when: shm_sgr_dir.stdout != "sgr"
-  
-- name: set acl
-  sudo: yes
-  shell: setfacl -R -m u:www-data:rwX -m u:vagrant:rwX /dev/shm/sgr/cache /dev/shm/sgr/logs; setfacl -dR -m u:www-data:rwX -m u:vagrant:rwX /dev/shm/sgr/cache /dev/shm/sgr/logs
-  when: shm_uma_dir.stdout == "sgr"
-  
-  ## Sudoers for SGR
-#- name: add commands to sudoers
-#  sudo: yes
-#  template: src=sudoers.tpl dest=/etc/sudoers
+  template: src=sudoers.tpl dest=/etc/sudoers
