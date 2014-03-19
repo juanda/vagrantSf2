@@ -3,15 +3,15 @@
   sudo: yes
   template: src={{ item.name }}_parameters.tpl dest=/var/www/{{item.name}}/app/config/parameters.yml
   with_items: symfony_apps
-  
+    
 - name: Install vendors locally to speed up the task
   sudo: no
   local_action: command composer.phar install -d /home/juanda/Apps/{{ item.name}}
   with_items: symfony_apps  
-    
-- name: Install vendors Symfony app {{ item.name }}
-  command:  /usr/bin/composer install  -d {{ item.path }} 
-  with_items: symfony_apps
+
+#- name: Install vendors Symfony app {{ item.name }}
+#  command:  /usr/bin/composer install  -d {{ item.path }} 
+#  with_items: symfony_apps
 
 ## Install assets
 
@@ -55,5 +55,32 @@
   
 - name: create /dev/shm/uma directory for speed up the symfony dev environment in vagrant
   sudo: yes
-  shell: mkdir /dev/shm/uma; mkdir /dev/shm/uma/cache; mkdir /dev/shm/uma/logs; setfacl -R -m u:www-data:rwX -m u:vagrant:rwX /dev/shm/uma/cache /dev/shm/uma/logs; setfacl -dR -m u:www-data:rwX -m u:vagrant:rwX /dev/shm/uma/cache /dev/shm/uma/logs
+  shell: mkdir /dev/shm/uma; mkdir /dev/shm/uma/cache; mkdir /dev/shm/uma/logs; 
   when: shm_uma_dir.stdout != "uma"
+  
+- name: set acl
+  sudo: yes
+  shell: setfacl -R -m u:www-data:rwX -m u:vagrant:rwX /dev/shm/uma/cache /dev/shm/uma/logs; setfacl -dR -m u:www-data:rwX -m u:vagrant:rwX /dev/shm/uma/cache /dev/shm/uma/logs
+  when: shm_uma_dir.stdout == "uma"
+  
+## Create /dev/shm/sgr for speed up
+
+- name: test if /dev/shm/sgr exists
+  shell: ls /dev/shm | grep sgr
+  ignore_errors: True
+  register: shm_sgr_dir
+  
+- name: create /dev/shm/sgr directory for speed up the symfony dev environment in vagrant
+  sudo: yes
+  shell: mkdir /dev/shm/sgr; mkdir /dev/shm/sgr/cache; mkdir /dev/shm/sgr/logs
+  when: shm_sgr_dir.stdout != "sgr"
+  
+- name: set acl
+  sudo: yes
+  shell: setfacl -R -m u:www-data:rwX -m u:vagrant:rwX /dev/shm/sgr/cache /dev/shm/sgr/logs; setfacl -dR -m u:www-data:rwX -m u:vagrant:rwX /dev/shm/sgr/cache /dev/shm/sgr/logs
+  when: shm_uma_dir.stdout == "sgr"
+  
+  ## Sudoers for SGR
+#- name: add commands to sudoers
+#  sudo: yes
+#  template: src=sudoers.tpl dest=/etc/sudoers

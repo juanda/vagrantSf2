@@ -30,4 +30,4 @@ parameters:
     usuarios.database.name: usuariosCNICE
     usuarios.database.host: localhost
     usuarios.database.user: root
-    usuarios.database.pass: root
+    usuarios.database.pass: 

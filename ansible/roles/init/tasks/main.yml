@@ -24,3 +24,6 @@
     sudo: yes
     apt:  pkg={{ item }} state=latest
     with_items: sys_packages
+  
+  - name: add sgr.local and uma.local to /etc/hosts
+    lineinfile: dest=/etc/hosts regexp="^127.0.0.1" "line=127.0.0.1   localhost sgr.local uma.local"
